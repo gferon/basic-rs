@@ -6,11 +6,8 @@ use std::fmt;
 
 #[derive(Debug, Fail)]
 pub enum Error {
-    // #[fail(display = "Parser error: {}", _0)]
     Parser(String),
-    // #[fail(display = "Syntax error")]
     StatementsAfterEnd { line_numbers: Vec<u16> },
-    // #[fail(display = "{}: error: program must have an END statement \n", line_number)]
     MissingEnd { line_number: u16 },
 }
 

@@ -1,20 +1,6 @@
 use error::Error;
 
 #[derive(Debug)]
-pub enum Digit {
-    D0,
-    D1,
-    D2,
-    D3,
-    D4,
-    D5,
-    D6,
-    D7,
-    D8,
-    D9,
-}
-
-#[derive(Debug)]
 pub struct Program {
     pub blocks: Vec<Block>,
 }
@@ -66,6 +52,7 @@ pub enum Block {
 #[derive(Debug)]
 pub enum Statement {
     Print(PrintStatement),
+    Let(LetStatement),
     Stop,
     End,
 }
@@ -86,7 +73,7 @@ pub struct StringConstant(pub String);
 
 #[derive(Debug)]
 pub enum NumericVariable {
-    Simple { letter: char, digit: Option<Digit> },
+    Simple { letter: char, digit: Option<u16> },
 }
 
 #[derive(Debug)]
@@ -134,7 +121,21 @@ pub enum Function {
     Tan(f64),
 }
 
-// 14. Print statement
+// 11. LET statement
+
+#[derive(Debug)]
+pub enum LetStatement {
+    Numeric {
+        variable: NumericVariable,
+        expression: NumericExpression,
+    },
+    String {
+        variable: StringVariable,
+        expression: StringExpression,
+    },
+}
+
+// 14. PRINT statement
 
 #[derive(Debug)]
 pub struct PrintStatement {
@@ -145,4 +146,23 @@ pub struct PrintStatement {
 pub enum PrintItem {
     Expression(Expression),
     TabCall(NumericExpression),
+    Comma,
+    Semicolon,
+}
+
+pub fn new_print_items(
+    items: Vec<(Option<PrintItem>, PrintItem)>,
+    trailing_item: Option<PrintItem>,
+) -> Vec<PrintItem> {
+    let mut res = Vec::new();
+    for (item, sep) in items {
+        if let Some(item) = item {
+            res.push(item);
+        }
+        res.push(sep);
+    }
+    if let Some(item) = trailing_item {
+        res.push(item);
+    }
+    res
 }
