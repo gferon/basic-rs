@@ -141,6 +141,39 @@ impl<'a> Interpreter<'a> {
                     Action::NextLine
                 }
             }
+            Statement::OnGoto(statement) => Action::Goto(self.evaluate_on_goto(statement, stderr)?),
+            Statement::For(for_statement) => {
+                let initial_value =
+                    self.evaluate_numeric_expression(&for_statement.initial_value, stderr)?;
+                self.state
+                    .numeric_values
+                    .insert(for_statement.control_variable, initial_value);
+                self.state.stack.push(self.state.current_line_number);
+                Action::NextLine
+            }
+            Statement::Next(control_variable) => {
+                let for_statement_line_number = self.state.stack.last().expect("NEXT before FOR");
+                let block = self
+                    .program
+                    .get_block_by_line_number(*for_statement_line_number)
+                    .expect("FOR not in stack");
+                match block {
+                    Block::Line {
+                        statement: Statement::For(for_statement),
+                        ..
+                    } => {
+                        let mut control_value = self
+                            .state
+                            .numeric_values
+                            .get_mut(control_variable)
+                            .expect("FOR without control variable");
+                        let inc =
+                            self.evaluate_numeric_expression(&for_statement.increment, stderr)?;
+                        *control_value += inc;
+                    }
+                    _ => panic!("shit"),
+                }
+            }
             Statement::Read(variables) => {
                 self.evaluate_read(variables, stderr)?;
                 Action::NextLine
@@ -445,6 +478,24 @@ impl<'a> Interpreter<'a> {
             .get(variable)
             .cloned()
             .unwrap_or(0f64))
+    }
+
+    fn evaluate_on_goto<W: Write>(
+        &self,
+        statement: &OnGotoStatement,
+        stderr: &mut W,
+    ) -> Result<u16, Error> {
+        let result_index = self
+            .evaluate_numeric_expression(&statement.numeric_expression, stderr)?
+            .round() as usize;
+        if result_index < 1 || result_index >= statement.line_numbers.len() {
+            return Err(Error::InvalidOnGotoValue {
+                src_line_number: self.state.current_line_number,
+                value: result_index,
+            });
+        }
+
+        Ok(statement.line_numbers[result_index - 1])
     }
 
     // Helper functions
