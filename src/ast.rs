@@ -438,6 +438,7 @@ pub enum Statement {
     Return,
     Stop,
     End,
+    Dim(Vec<ArrayDeclaration>),
 }
 
 #[derive(Debug, PartialEq)]
@@ -782,4 +783,12 @@ pub fn new_print_items(
         res.push(item);
     }
     res
+}
+
+// 18. ARRAY declarations
+
+#[derive(Debug, PartialEq)]
+pub struct ArrayDeclaration {
+    pub letter: char,
+    pub bounds: (u64, Option<u64>),
 }
