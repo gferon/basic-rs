@@ -439,6 +439,7 @@ pub enum Statement {
     Stop,
     End,
     Dim(Vec<ArrayDeclaration>),
+    OptionBase(OptionBase),
 }
 
 #[derive(Debug, PartialEq)]
@@ -802,4 +803,10 @@ pub fn new_print_items(
 pub struct ArrayDeclaration {
     pub letter: char,
     pub bounds: (u64, Option<u64>),
+}
+
+#[derive(Debug, PartialEq, Eq)]
+pub enum OptionBase {
+    Base0,
+    Base1,
 }
