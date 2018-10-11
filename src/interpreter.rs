@@ -183,6 +183,7 @@ impl<'a> Interpreter<'a> {
                     Action::NextLine
                 }
             }
+            Statement::Input(_) => Action::NextLine,
             Statement::Read(variables) => {
                 self.evaluate_read(variables, stderr)?;
                 Action::NextLine
